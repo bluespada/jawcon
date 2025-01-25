@@ -77,14 +77,13 @@ func main() {
 
 	// Start listening for UDP packages on the given address
 	conn, err := net.ListenUDP("udp", udpAddr)
-
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Read from UDP listener in endless loop
 	for {
-		var buf [1024]byte
+		var buf [512]byte
 		_, _, err := conn.ReadFromUDP(buf[0:])
 		if err != nil {
 			log.Fatalln(err)
@@ -101,53 +100,73 @@ func gamepad_hanlder(gamepad uinput.Gamepad, data []string) {
 	var KEYCODE = strings.TrimSpace(data[0])
 	var KEYVAL, _ = strconv.ParseFloat(strings.TrimSpace(data[1]), 32)
 	var KEYTYPE, _ = strconv.Atoi(strings.TrimSpace(data[2]))
+	log.Println(KEYCODE, KEYVAL)
+
 	if KEYTYPE == 1 {
+
 		if key, ok := MAP_BUTTON_KEYCODE[KEYCODE]; ok {
 			if KEYVAL == 0.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonDown(key)
 			}
 			if KEYVAL == 1.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonUp(key)
 			}
 		}
 	} else if KEYTYPE == 0 {
 		switch KEYCODE {
 		case "AXIS_HAT_Y":
+
 			if KEYVAL == -1.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonDown(uinput.ButtonDpadDown)
 			} else {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonUp(uinput.ButtonDpadDown)
 			}
 
 			if KEYVAL == 1.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonDown(uinput.ButtonDpadUp)
 			} else {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonUp(uinput.ButtonDpadUp)
 			}
 		case "AXIS_HAT_X":
+
 			if KEYVAL == -1.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonDown(uinput.ButtonDpadLeft)
 			} else {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonUp(uinput.ButtonDpadLeft)
 			}
 
 			if KEYVAL == 1.0 {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonDown(uinput.ButtonDpadRight)
 			} else {
+				time.Sleep(15 * time.Millisecond)
 				gamepad.ButtonUp(uinput.ButtonDpadRight)
 			}
 		case "AXIS_X":
+			time.Sleep(5 * time.Millisecond)
 			gamepad.LeftStickMoveX(float32(KEYVAL))
 		case "AXIS_Y":
+			time.Sleep(5 * time.Millisecond)
 			gamepad.LeftStickMoveY(float32(KEYVAL) * -1)
 		case "AXIS_RZ":
+			time.Sleep(5 * time.Millisecond)
 			gamepad.RightStickMoveY(float32(KEYVAL) * -1)
 		case "AXIS_Z":
+			time.Sleep(5 * time.Millisecond)
 			gamepad.RightStickMoveX(float32(KEYVAL))
 		case "AXIS_LTRIGGER":
-			log.Println("VAL", KEYVAL)
+			time.Sleep(5 * time.Millisecond)
 			gamepad.LeftTriggerForce(float32(KEYVAL))
 		case "AXIS_RTRIGGER":
+			time.Sleep(5 * time.Millisecond)
 			gamepad.RightTriggerForce(float32(KEYVAL))
 		}
 	}

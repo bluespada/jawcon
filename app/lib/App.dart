@@ -16,7 +16,7 @@ class App extends StatefulWidget {
 
 class _App extends State<App> {
 
-  final String host = "192.168.2.161";
+  final String host = "192.168.1.13";
   final int port = 8890;
 
   @override
@@ -27,29 +27,40 @@ class _App extends State<App> {
 
   void initMe() async {
     
-    Gamepads.events.listen((event) {
-      RawDatagramSocket.bind(InternetAddress.anyIPv4, port).then((socket){
-        socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
-        socket.close();
+    // `````````````Gamepads.events.listen((event) {
+    //   RawDatagramSocket.bind(InternetAddress.anyIPv4, port).then((socket){
+    //     socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
+    //     socket.close();
+    //   });
+    //   setState(() {
+    //     widget.name = event.toString();
+    //   });
+    // });`````````````
+    var previousKey = {};
+    RawDatagramSocket.bind(InternetAddress.anyIPv4, port).then((socket){
+      // socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
+      Gamepads.events.listen((event){
+        if(previousKey.containsKey(event.key)){
+          if(event.type == KeyType.button){
+            if(previousKey[event.key] == event.value){
+              previousKey[event.key] = event.value;
+              return;
+            }
+            socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
+            previousKey[event.key] = event.value;
+          }else{
+            socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
+          }
+        }else{
+          socket.send([event.key,event.value, event.type == KeyType.button ? 1 : 0, "endl"].join(",").codeUnits, InternetAddress(host), port);
+          previousKey[event.key] = event.value;
+        }
       });
+    }).catchError((err){
       setState(() {
-        widget.name = event.toString();
+        widget.socket_state = "Socket Error: $err"; 
       });
     });
-
-    // RawDatagramSocket.bind(InternetAddress.anyIPv4, port).then((socket){
-    //   Gamepads.events.listen((event){
-    //     String messages = "";
-    //     var x = socket.send([event.key, event.value].join(",").codeUnits, InternetAddress(host), port);
-    //     setState(() {
-    //       widget.socket_state = x.toString();
-    //     });
-    //   });
-    // }).catchError((err){
-    //   setState(() {
-    //     widget.socket_state = "Socket Error: $err"; 
-    //   });
-    // });
   }
 
   Future<List<String>> getConnected() async {
